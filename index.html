@@ -180,6 +180,30 @@
     background:linear-gradient(135deg,#FFFBEB,#FEF9C3); border:1px solid #FDE68A; color:#854D0E; }
   .alt .i { flex-shrink:0; }
 
+  /* ───── SWAP STREET FOOD (reemplazo de comida) ───── */
+  .swap-box { margin-top:12px; }
+  .swap-cta { width:100%; border:1.5px dashed #FBBF24; background:#FFFBEB; color:#92400E; border-radius:var(--r-md);
+    padding:12px; font-family:var(--font); font-size:12.5px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s; }
+  .swap-cta:active { background:#FEF3C7; }
+  .swap-active { display:flex; align-items:center; gap:11px; border-radius:var(--r-md); padding:11px 13px;
+    background:linear-gradient(135deg,#FEF3C7,#FDE68A); border:1px solid #FCD34D; }
+  .swap-active .si { font-size:20px; flex-shrink:0; }
+  .swap-active .st { flex:1; min-width:0; }
+  .swap-active .st .sl { font-size:9.5px; font-weight:800; color:#92400E; text-transform:uppercase; letter-spacing:.6px; }
+  .swap-active .st .sn { font-size:13px; font-weight:700; color:#1E293B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .swap-active .sk { font-weight:800; color:#92400E; font-size:13px; white-space:nowrap; }
+  .swap-active .sx { border:none; background:rgba(0,0,0,.10); width:24px; height:24px; border-radius:50%; cursor:pointer;
+    font-size:12px; line-height:1; flex-shrink:0; color:#1E293B; }
+  .swap-active .sx:active { background:rgba(0,0,0,.22); }
+
+  .swap-banner { display:none; margin:0 16px 12px; border-radius:var(--r-md); padding:12px 14px;
+    background:linear-gradient(135deg,#0F172A,#1E293B); color:#fff; align-items:center; gap:10px; }
+  .swap-banner.show { display:flex; }
+  .swap-banner .sb-t { flex:1; font-size:12.5px; font-weight:700; }
+  .swap-banner .sb-c { border:none; background:rgba(255,255,255,.14); color:#fff; border-radius:20px; padding:6px 12px;
+    font-family:var(--font); font-weight:700; font-size:11.5px; cursor:pointer; flex-shrink:0; }
+
   /* ───── TRAINING ───── */
   .train { margin:0 16px; background:linear-gradient(135deg,#1E293B,#0F172A); border-radius:var(--r-lg); padding:18px;
     color:#fff; box-shadow:var(--sh); position:relative; overflow:hidden; }
@@ -355,13 +379,14 @@
     <div class="ic">😋</div>
     <div><h2>Gustos y extras</h2><p>Para tus antojos, con medida</p></div>
   </div>
-  <div class="tabs">
+  <div class="tabs" id="extras-tabs">
     <button class="tab active" data-tab="gustos">Gustos</button>
     <button class="tab" data-tab="street">Street Food</button>
     <button class="tab" data-tab="recom">Tips</button>
   </div>
   <div class="panel active" id="p-gustos"></div>
   <div class="panel" id="p-street">
+    <div class="swap-banner" id="swap-banner"></div>
     <div class="sf-tabs" id="sf-tabs"></div>
     <div id="sf-pans"></div>
   </div>
@@ -444,7 +469,7 @@ const PLAN = {
         ]}
       ], alts:[] },
 
-    { id:"almuerzo", nombre:"Almuerzo", horario:"04:00 pm", emoji:"🍽️", kcal:540, grupos:[
+    { id:"almuerzo", nombre:"Almuerzo", horario:"04:00 pm", emoji:"🍽️", kcal:540, swapStreetFood:true, grupos:[
         { id:"c", tipo:"carbohidrato", porciones:3, nota:"Puedes repetir porciones", opciones:[
           {descripcion:"Arroz blanco", medida:"⅓ taza", cantidad:"60g"},
           {descripcion:"Papa o camote", medida:"½ unidad", cantidad:"90g"},
@@ -488,7 +513,7 @@ const PLAN = {
         {t:"Alternativa: 1 Gloria Pro Power (210 kcal) reemplaza toda la media tarde."}
       ] },
 
-    { id:"cena", nombre:"Cena", horario:"08:00 pm", emoji:"🌙", kcal:370, grupos:[
+    { id:"cena", nombre:"Cena", horario:"08:00 pm", emoji:"🌙", kcal:370, swapStreetFood:true, grupos:[
         { id:"c", tipo:"carbohidrato", porciones:2, nota:"Puedes repetir porciones", opciones:[
           {descripcion:"Pan de molde", medida:"1 tajada", cantidad:"25g"},
           {descripcion:"Pan (centeno, francés, yema…)", medida:"½ unidad", cantidad:"25g"},
@@ -574,6 +599,8 @@ const LS_KEY = 'plan_' + slug(PLAN.paciente.nombre) + '_v1';
 
 const state = {}; // state[mealId][grpId][optIdx] = count
 const extras = {}; // extras[key] = { kcal, label, emoji } · street food / antojos sumados al día
+const swaps = {};  // swaps[mealId] = { kcal, label } · street food que reemplaza una comida
+let pendingSwap = null; // mealId esperando que el usuario elija un street food
 let trained = false;
 
 // ── encabezado del paciente ──
@@ -615,10 +642,11 @@ function jsStr(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").re
 
 function computeMealKcal(meal){ let k=0; meal.grupos.forEach(g=>Object.entries(state[meal.id][g.id]).forEach(([i,n])=>{ if(n>0) k+=n*KCAL[g.tipo]; })); return k; }
 function computeExtrasKcal(){ return Object.values(extras).reduce((s,e)=>s + e.kcal*(e.count||1), 0); }
-function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({state, trained, extras})); }catch(e){} }
+function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({state, trained, extras, swaps})); }catch(e){} }
 function loadState(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) return; const s=JSON.parse(raw);
   if(s.state) MEALS.forEach(m=>{ if(s.state[m.id]) m.grupos.forEach(g=>{ if(s.state[m.id][g.id]) state[m.id][g.id]=s.state[m.id][g.id]; }); });
   if(s.extras){ Object.assign(extras, s.extras); Object.values(extras).forEach(e=>{ if(typeof e.count!=='number'||e.count<1) e.count=1; }); }
+  if(s.swaps) Object.assign(swaps, s.swaps);
   trained = !!s.trained; }catch(e){} }
 function toggleTrained(v){ trained=v; refreshDaily(); saveState(); }
 
@@ -649,9 +677,69 @@ function refreshExtraUI(){
   }).join('');
 }
 
+// ── reemplazo de comida por street food ──
+// El botón "Reemplazar por Street Food" de una comida (almuerzo/cena) deja esa
+// comida "pendiente", lleva al usuario a las listas de street food de abajo y el
+// siguiente street food que registre se contabiliza COMO esa comida (sustituye sus
+// kcal en el total del día, no se suman además). Cada comida solo puede tener un
+// reemplazo activo; se quita desde la propia tarjeta de la comida.
+function startSwap(mealId){
+  pendingSwap = mealId;
+  showTab('street');
+  refreshSwapBanner();
+  document.getElementById('extras-tabs').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function cancelSwap(){ pendingSwap = null; refreshSwapBanner(); }
+function refreshSwapBanner(){
+  const b = document.getElementById('swap-banner');
+  if(!b) return;
+  if(pendingSwap){
+    const meal = MEALS.find(m=>m.id===pendingSwap);
+    b.classList.add('show');
+    b.innerHTML = `<div class="sb-t">🔄 Elige un street food para reemplazar tu <b>${meal.nombre.toLowerCase()}</b></div>`+
+      `<button class="sb-c" onclick="cancelSwap()">Cancelar</button>`;
+  } else { b.classList.remove('show'); b.innerHTML=''; }
+}
+// router de los botones de street food: si hay una comida pendiente de reemplazo,
+// el registro va a esa comida; si no, se contabiliza como extra del día.
+function registerSF(key, kcal, label){
+  if(pendingSwap){ applySwap(pendingSwap, kcal, label); }
+  else { addExtra(key, kcal, label, '🍔'); }
+}
+function applySwap(mealId, kcal, label){
+  swaps[mealId] = { kcal, label };
+  pendingSwap = null;
+  refreshSwapBanner();
+  const meal = MEALS.find(m=>m.id===mealId);
+  refreshSwap(meal); refreshMeal(meal); refreshDaily(); saveState();
+  const el = document.getElementById('meal-'+mealId);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function removeSwap(mealId){
+  delete swaps[mealId];
+  const meal = MEALS.find(m=>m.id===mealId);
+  refreshSwap(meal); refreshMeal(meal); refreshDaily(); saveState();
+}
+// pinta el cuadro de reemplazo dentro de la tarjeta de la comida
+function refreshSwap(meal){
+  const box = document.getElementById('swap-'+meal.id);
+  if(!box) return;
+  const sw = swaps[meal.id];
+  if(sw){
+    box.innerHTML = `<div class="swap-active">`+
+      `<div class="si">🍔</div>`+
+      `<div class="st"><div class="sl">Reemplazo activo</div><div class="sn">${sw.label}</div></div>`+
+      `<div class="sk">+${sw.kcal} kcal</div>`+
+      `<button class="sx" onclick="removeSwap('${meal.id}')" aria-label="Quitar reemplazo">✕</button>`+
+      `</div>`;
+  } else {
+    box.innerHTML = `<button class="swap-cta" onclick="startSwap('${meal.id}')">🔄 Reemplazar por Street Food</button>`;
+  }
+}
+
 function refreshDaily(){
   const target = DAILY_TARGET + (trained ? EXTRA_KCAL : 0);
-  const total = MEALS.reduce((s,m)=>s+computeMealKcal(m),0) + computeExtrasKcal();
+  const total = MEALS.reduce((s,m)=>s+(swaps[m.id]?swaps[m.id].kcal:computeMealKcal(m)),0) + computeExtrasKcal();
   const pct = Math.min(100, Math.round(total/target*100));
   const fill = document.getElementById('day-fill');
   document.getElementById('day-now').textContent = total;
@@ -702,8 +790,10 @@ MEALS.forEach(meal => {
   const altsHtml = meal.alts && meal.alts.length ? `<div class="alts">${meal.alts.map(a=>
     `<div class="alt"><span class="i">💡</span><span>${a.t}</span></div>`).join('')}</div>` : '';
 
+  const swapHtml = meal.swapStreetFood ? `<div class="swap-box" id="swap-${meal.id}"></div>` : '';
+
   mealsEl.insertAdjacentHTML('beforeend', `
-    <div class="meal">
+    <div class="meal" id="meal-${meal.id}">
       <div class="meal-h">
         <div class="meal-emoji">${meal.emoji}</div>
         <div class="t"><div class="n">${meal.nombre}</div><div class="time">⏰ ${meal.horario}</div></div>
@@ -721,6 +811,7 @@ MEALS.forEach(meal => {
           <div class="plato-foot"><span class="lab">Total armado</span><span class="val" id="foot-${meal.id}">0 kcal</span></div>
         </div>
         ${altsHtml}
+        ${swapHtml}
       </div>
     </div>`);
 });
@@ -771,9 +862,18 @@ function refreshMeal(meal) {
         rows.push(`<div class="plato-row"><div class="pl-l"><span class="pl-dot" style="background:${TIPO_COLOR[g.tipo]}"></span><span class="pl-name">${op.descripcion}</span></div><span class="pl-qty">${multiply(op,n)}</span></div>`); }
     });
   });
-  document.getElementById(`now-${meal.id}`).textContent = kcal;
-  document.getElementById(`now-${meal.id}`).style.color = kcal===0?'#CBD5E1':(kcal>meal.kcal?'#EF4444':'#22C55E');
-  document.getElementById(`foot-${meal.id}`).textContent = `${kcal} kcal`;
+  // si hay un street food en reemplazo, el contador superior de la comida refleja
+  // esas kcal (lo que realmente cuenta para el día), no las porciones armadas
+  const sw = swaps[meal.id];
+  if(sw){
+    // el reemplazo aparece como una línea propia en el recibo para que el total cuadre
+    rows.push(`<div class="plato-row"><div class="pl-l"><span class="pl-dot" style="background:#F59E0B"></span><span class="pl-name">🍔 ${sw.label}</span></div><span class="pl-qty">+${sw.kcal} kcal</span></div>`);
+  }
+  const shown = sw ? sw.kcal : kcal;
+  const nowEl = document.getElementById(`now-${meal.id}`);
+  nowEl.textContent = shown;
+  nowEl.style.color = shown===0?'#CBD5E1':(shown>meal.kcal?'#EF4444':'#22C55E');
+  document.getElementById(`foot-${meal.id}`).textContent = `${shown} kcal`;
   document.getElementById(`plato-${meal.id}`).innerHTML = rows.join('');
   document.getElementById(`empty-${meal.id}`).style.display = rows.length?'none':'block';
   refreshDaily();
@@ -799,6 +899,7 @@ loadState();
 const tc = document.getElementById('train-check'); if(tc) tc.checked = trained;
 MEALS.forEach(meal=>{
   meal.grupos.forEach(g=>{ g.opciones.forEach((_,i)=>refreshOpt(meal.id,g,i)); refreshGrp(meal.id,g); });
+  if(meal.swapStreetFood) refreshSwap(meal);
   refreshMeal(meal);
 });
 refreshDaily();
@@ -833,9 +934,9 @@ document.getElementById('sf-pans').innerHTML = PLAN.street_food.map((s,i)=>`
   <div class="sf-pan ${s.id} ${i===0?'active':''}" id="sfp-${s.id}">
     <div class="sf-card">
       <div class="sf-ban">🍔 Registra lo que comiste · ${s.nm} (hasta ${s.kc} kcal c/u)</div>
-      <div class="sf-list">${s.items.map((it,j)=>`<div class="sf-it"><span class="e">🍽️</span><span class="it-name">${it}</span><button class="it-add" onclick="addExtra('sf-${s.id}-${j}', ${s.kc}, '${jsStr(it)}', '🍔')" aria-label="Registrar">＋</button></div>`).join('')}</div>
+      <div class="sf-list">${s.items.map((it,j)=>`<div class="sf-it"><span class="e">🍽️</span><span class="it-name">${it}</span><button class="it-add" onclick="registerSF('sf-${s.id}-${j}', ${s.kc}, '${jsStr(it)}')" aria-label="Registrar">＋</button></div>`).join('')}</div>
       <div class="sf-add">
-        <button class="sf-add-btn" onclick="addExtra('sf-${s.id}-gen', ${s.kc}, 'Street Food ${s.nm}', '🍔')">＋ Registrar ${s.nm} sin especificar · +${s.kc} kcal</button>
+        <button class="sf-add-btn" onclick="registerSF('sf-${s.id}-gen', ${s.kc}, 'Street Food ${s.nm}')">＋ Registrar ${s.nm} sin especificar · +${s.kc} kcal</button>
       </div>
     </div>
   </div>`).join('');
@@ -855,13 +956,14 @@ document.getElementById('recs').innerHTML = PLAN.recomendaciones.map(r=>
   `<div class="rec"><span class="e">${r.e}</span><span>${r.t}</span></div>`).join('');
 
 // ── tabs principales ──
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const panel = document.getElementById('p-'+name);
+  if(panel) panel.classList.add('active');
+}
 document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('p-'+tab.dataset.tab).classList.add('active');
-  });
+  tab.addEventListener('click', ()=>showTab(tab.dataset.tab));
 });
 </script>
 </body>
