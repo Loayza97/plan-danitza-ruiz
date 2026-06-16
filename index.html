@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plan de Alimentación · Danitza Ruiz</title>
+<title>Plan de Alimentación</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -213,8 +213,15 @@
   .g-pos  .gusto-h{background:linear-gradient(135deg,#EDE9FE,#DDD6FE)} .g-pos .nm{color:#5B21B6} .g-pos .kc{background:#8B5CF6;color:#fff}
   .gusto-b { display:none; background:var(--card); padding:8px 16px 14px; flex-direction:column; gap:2px; }
   .gusto-b.open { display:flex; }
-  .gusto-it { font-size:13px; padding:8px 0; border-bottom:1px solid var(--line); display:flex; gap:9px; }
+  .gusto-it { font-size:13px; padding:8px 0; border-bottom:1px solid var(--line); display:flex; gap:9px; align-items:center; }
   .gusto-it:last-child { border-bottom:none; } .gusto-it .d { color:var(--muted); }
+  .g-mini .it-add{background:#FEF3C7;color:#854D0E} .g-reg .it-add{background:#FFE4E6;color:#9F1239} .g-pos .it-add{background:#EDE9FE;color:#5B21B6}
+  .gusto-add { padding:10px 0 2px; }
+  .gusto-add-btn { width:100%; border:none; border-radius:12px; padding:11px; font-family:var(--font); font-size:13px; font-weight:800;
+    cursor:pointer; color:#fff; transition:filter .15s, background .2s; }
+  .g-mini .gusto-add-btn{background:#F59E0B;color:#422006} .g-reg .gusto-add-btn{background:#F43F5E} .g-pos .gusto-add-btn{background:#8B5CF6}
+  .gusto-add-btn:active { filter:brightness(.94); }
+  .gusto-add-btn.added { background:#0F172A; color:#fff; }
 
   /* ───── STREET ───── */
   .sf-tabs { display:flex; gap:8px; margin:0 16px 14px; }
@@ -233,6 +240,20 @@
   .sf-list { padding:10px 14px 14px; display:flex; flex-direction:column; gap:6px; }
   .sf-it { font-size:12.5px; padding:9px 11px; border-radius:11px; background:#FBFBFC; display:flex; gap:8px; align-items:center; }
   .sf-it .e { flex-shrink:0; }
+  .it-name { flex:1; min-width:0; }
+  .it-add { flex-shrink:0; width:26px; height:26px; border:none; border-radius:50%; font-size:17px; font-weight:700;
+    cursor:pointer; display:grid; place-items:center; line-height:1; padding:0; }
+  .it-add:active { filter:brightness(.9); }
+  .sf-pan.peq .it-add{background:var(--fruta-soft);color:var(--fruta-deep)}
+  .sf-pan.med .it-add{background:var(--carbo-soft);color:var(--carbo-deep)}
+  .sf-pan.gra .it-add{background:var(--protg-soft);color:var(--protg-deep)}
+  .sf-add { padding:0 14px 14px; }
+  .sf-add-btn { width:100%; border:none; border-radius:12px; padding:12px; font-family:var(--font); font-size:13px; font-weight:800;
+    cursor:pointer; color:#fff; display:flex; align-items:center; justify-content:center; gap:7px; transition:filter .15s, background .2s; }
+  .sf-pan.peq .sf-add-btn{background:var(--fruta)} .sf-pan.med .sf-add-btn{background:var(--carbo);color:#422006}
+  .sf-pan.gra .sf-add-btn{background:var(--protg)}
+  .sf-add-btn:active { filter:brightness(.94); }
+  .sf-add-btn.added { background:#0F172A; color:#fff; }
 
   /* ───── RECOM ───── */
   .recs { margin:0 16px; background:var(--card); border-radius:var(--r-md); box-shadow:var(--sh); padding:6px 16px; }
@@ -263,50 +284,48 @@
   .day-top .rem { font-size:12.5px; font-weight:800; white-space:nowrap; }
   .day-bar { height:9px; border-radius:9px; background:rgba(255,255,255,.13); overflow:hidden; }
   .day-bar i { display:block; height:100%; width:0; border-radius:9px; background:#475569; transition:width .35s,background .35s; }
+  .day-extras { display:none; flex-wrap:wrap; gap:6px; }
+  .day-extras.show { display:flex; }
+  .day-chip { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12);
+    border-radius:20px; padding:5px 6px 5px 11px; font-size:11.5px; font-weight:700; }
+  .day-chip .dc-l { max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .day-chip b { color:#FBBF24; font-weight:800; }
+  .day-chip button { width:18px; height:18px; border:none; border-radius:50%; background:rgba(255,255,255,.14); color:#fff;
+    font-size:11px; line-height:1; cursor:pointer; display:grid; place-items:center; flex-shrink:0; }
+  .day-chip button:active { background:rgba(255,255,255,.28); }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- HERO -->
+  <!-- HERO (rendered from PLAN.paciente) -->
   <div class="hero">
     <div class="hero-top">
       <div>
-        <h1>Danitza Ruiz</h1>
-        <div class="sub">Sesión #1 · Consulta 25 abr 2026<br>Próxima sesión: 20 jul 2026</div>
+        <h1 id="pac-nombre"></h1>
+        <div class="sub" id="pac-sub"></div>
       </div>
-      <div class="goal">🎯 Pérdida de grasa</div>
+      <div class="goal" id="pac-objetivo"></div>
     </div>
-    <div class="vitals">
-      <div class="vital"><div class="v">63.7<span style="font-size:11px">kg</span></div><div class="l">Peso</div></div>
-      <div class="vital"><div class="v">1.64<span style="font-size:11px">m</span></div><div class="l">Talla</div></div>
-      <div class="vital"><div class="v">23</div><div class="l">Años</div></div>
-      <div class="vital"><div class="v">35.2<span style="font-size:11px">%</span></div><div class="l">Grasa</div></div>
-      <div class="vital"><div class="v">27.4<span style="font-size:11px">%</span></div><div class="l">Músculo</div></div>
-      <div class="vital"><div class="v">75.1<span style="font-size:11px">cm</span></div><div class="l">Cintura</div></div>
-    </div>
+    <div class="vitals" id="vitals"></div>
   </div>
 
-  <!-- MACROS -->
+  <!-- MACROS (rendered from PLAN.resumen) -->
   <div class="macro-card">
     <h3>Objetivo diario</h3>
     <div class="macros">
-      <div class="mc kcal"><div class="num">1391</div><div class="unit">kcal</div></div>
+      <div class="mc kcal"><div class="num" id="rs-kcal"></div><div class="unit">kcal</div></div>
       <div class="mc-sep"></div>
-      <div class="mc p"><div class="num">83g</div><div class="unit">Proteína</div></div>
+      <div class="mc p"><div class="num" id="rs-prot"></div><div class="unit">Proteína</div></div>
       <div class="mc-sep"></div>
-      <div class="mc c"><div class="num">147g</div><div class="unit">Carbos</div></div>
+      <div class="mc c"><div class="num" id="rs-carbo"></div><div class="unit">Carbos</div></div>
       <div class="mc-sep"></div>
-      <div class="mc g"><div class="num">53g</div><div class="unit">Grasas</div></div>
+      <div class="mc g"><div class="num" id="rs-grasa"></div><div class="unit">Grasas</div></div>
     </div>
     <div class="ring">
-      <i class="rp" style="width:24%"></i><i class="rc" style="width:43%"></i><i class="rg" style="width:33%"></i>
+      <i class="rp" id="ring-p"></i><i class="rc" id="ring-c"></i><i class="rg" id="ring-g"></i>
     </div>
-    <div class="ring-leg">
-      <span><b style="background:var(--protm)"></b>Proteína 24%</span>
-      <span><b style="background:var(--carbo)"></b>Carbos 43%</span>
-      <span><b style="background:var(--protg)"></b>Grasas 33%</span>
-    </div>
+    <div class="ring-leg" id="ring-leg"></div>
   </div>
 
   <!-- MEALS -->
@@ -322,10 +341,10 @@
     <div><h2>Días de entrenamiento</h2><p>Agrega 1 opción extra</p></div>
   </div>
   <div class="train">
-    <div class="train-h"><span class="e">🏋️</span><h3>Elige 1 de estas opciones</h3><span class="b">+180 kcal</span></div>
+    <div class="train-h"><span class="e">🏋️</span><h3>Elige 1 de estas opciones</h3><span class="b" id="train-badge"></span></div>
     <div class="train-list" id="train"></div>
     <label class="train-toggle">
-      <span class="lbl">¿Entrenaste hoy? Sube tu requerimiento a 1571 kcal (+180)</span>
+      <span class="lbl" id="train-toggle-lbl"></span>
       <input type="checkbox" id="train-check" onchange="toggleTrained(this.checked)">
       <span class="switch"></span>
     </label>
@@ -354,10 +373,11 @@
 <!-- DAILY BAR -->
 <div class="daybar">
   <div class="daybar-inner">
+    <div class="day-extras" id="day-extras"></div>
     <div class="day-top">
       <div>
         <div class="l">🔥 Total del día</div>
-        <div class="v"><span id="day-now">0</span> <span class="tgt">/ <span id="day-tgt">1391</span> kcal</span></div>
+        <div class="v"><span id="day-now">0</span> <span class="tgt">/ <span id="day-tgt"></span> kcal</span></div>
       </div>
       <div class="rem" id="day-rem"></div>
     </div>
@@ -366,126 +386,219 @@
 </div>
 
 <script>
-const KCAL = { carbohidrato:80, proteina_magra:55, proteina_grasa:75, fruta:60, ensalada:25, lacteo:75 };
+/* ════════════════════════════════════════════════════════════════════════
+   PLAN · Único objeto de datos. Reemplaza SOLO este objeto para generar un
+   plan nuevo. Toda la interfaz (encabezado, vitales, macros, comidas, barra
+   diaria, persistencia) se construye a partir de aquí. No toques el resto.
+   Consulta references/esquema-datos.md para el detalle de cada campo.
+   ════════════════════════════════════════════════════════════════════════ */
+const PLAN = {
+  paciente: {
+    nombre: "Danitza Ruiz",
+    sub: "Sesión #1 · Consulta 25 abr 2026<br>Próxima sesión: 20 jul 2026",
+    objetivo: "🎯 Pérdida de grasa",
+    vitales: [
+      { v:"63.7", u:"kg", l:"Peso" },
+      { v:"1.64", u:"m",  l:"Talla" },
+      { v:"23",   u:"",   l:"Años" },
+      { v:"35.2", u:"%",  l:"Grasa" },
+      { v:"27.4", u:"%",  l:"Músculo" },
+      { v:"75.1", u:"cm", l:"Cintura" }
+    ]
+  },
+
+  resumen: { kcal:1391, prot:83, carbo:147, grasa:53, pctProt:24, pctCarbo:43, pctGrasa:33 },
+
+  equivalencias: { carbohidrato:80, proteina_magra:55, proteina_grasa:75, fruta:60, ensalada:25, lacteo:75 },
+
+  comidas: [
+    { id:"desayuno", nombre:"Desayuno", horario:"11:00 am", emoji:"☀️", kcal:295, grupos:[
+        { id:"c", tipo:"carbohidrato", porciones:2, nota:"Puedes repetir porciones", opciones:[
+          {descripcion:"Pan de molde", medida:"1 tajada", cantidad:"25g"},
+          {descripcion:"Pan (centeno, francés, yema…)", medida:"½ unidad", cantidad:"25g"},
+          {descripcion:"Rapidita", medida:"1 unidad"},
+          {descripcion:"Avena cruda", medida:"3 cdas", cantidad:"20g"},
+          {descripcion:"Avena, quinua o maca bebible", medida:"½ taza"},
+          {descripcion:"Granola", medida:"¼ taza", cantidad:"20g"},
+          {descripcion:"Cereales sin azúcar", medida:"½ taza", cantidad:"20g"}
+        ]},
+        { id:"p", tipo:"proteina_grasa", porciones:1, opciones:[
+          {descripcion:"Huevo", medida:"1 unidad"},
+          {descripcion:"Atún", cantidad:"45g"},
+          {descripcion:"Pollo deshilachado", medida:"3 cdas llenas", cantidad:"45g"},
+          {descripcion:"Queso", cantidad:"30g"},
+          {descripcion:"Jamón", medida:"2 tajadas"},
+          {descripcion:"Hot dog", medida:"½ unidad"},
+          {descripcion:"Leche descremada", medida:"1 taza", cantidad:"250ml"},
+          {descripcion:"Yogurt bebible light", medida:"1 vaso", cantidad:"200ml"},
+          {descripcion:"Leche de almendras", medida:"1 taza", cantidad:"250ml"}
+        ]},
+        { id:"f", tipo:"fruta", porciones:1, opciones:[
+          {descripcion:"Mango", medida:"½ taza", cantidad:"100g"},
+          {descripcion:"Melón", medida:"1¼ taza", cantidad:"170g"},
+          {descripcion:"Plátano pequeño", medida:"1 unidad", cantidad:"80g"},
+          {descripcion:"Fresas", medida:"1¼ taza", cantidad:"170g"},
+          {descripcion:"Arándanos", medida:"¾ taza", cantidad:"90g"},
+          {descripcion:"Papaya", medida:"1 taza", cantidad:"120g"},
+          {descripcion:"Piña", medida:"¾ taza", cantidad:"120g"}
+        ]}
+      ], alts:[] },
+
+    { id:"almuerzo", nombre:"Almuerzo", horario:"04:00 pm", emoji:"🍽️", kcal:540, grupos:[
+        { id:"c", tipo:"carbohidrato", porciones:3, nota:"Puedes repetir porciones", opciones:[
+          {descripcion:"Arroz blanco", medida:"⅓ taza", cantidad:"60g"},
+          {descripcion:"Papa o camote", medida:"½ unidad", cantidad:"90g"},
+          {descripcion:"Yuca", medida:"⅓ taza", cantidad:"50g"},
+          {descripcion:"Choclo en grano", medida:"½ taza", cantidad:"110g"},
+          {descripcion:"Menestras", medida:"⅓ taza", cantidad:"70g"},
+          {descripcion:"Guiso criollo", medida:"½ taza", cantidad:"100g"},
+          {descripcion:"Pasta", medida:"½ taza", cantidad:"45g"}
+        ]},
+        { id:"p", tipo:"proteina_magra", porciones:5, nota:"Magras, sin grasa visible", opciones:[
+          {descripcion:"Carne de res", cantidad:"25g"},
+          {descripcion:"Pollo o pavo", cantidad:"35g"},
+          {descripcion:"Pescado o atún escurrido", cantidad:"35g"},
+          {descripcion:"Lomo de cerdo / chuleta (sin borde graso)", cantidad:"35g"},
+          {descripcion:"Pollo Avinka", medida:"1 dedo"},
+          {descripcion:"Nugget de pollo Avinka", medida:"1 unidad"}
+        ]},
+        { id:"e", tipo:"ensalada", porciones:1, nota:"1 taza libre: lechuga, tomate, pepino, cebolla, zanahoria, brócoli, espárrago, col morada, arúgula, pimiento, rabanito, espinaca…", opciones:[
+          {descripcion:"Ensalada a tu gusto", medida:"1 taza"}
+        ]}
+      ], alts:[
+        {t:"Si comes menú (sin frituras), omite la porción de yogurt de la media tarde."}
+      ] },
+
+    { id:"media", nombre:"Media Tarde", horario:"06:00 pm", emoji:"🥤", kcal:195, grupos:[
+        { id:"l", tipo:"lacteo", porciones:1, opciones:[
+          {descripcion:"Leche descremada", medida:"1 taza", cantidad:"250ml"},
+          {descripcion:"Yogurt bebible light", medida:"1 vaso", cantidad:"200ml"},
+          {descripcion:"Leche de almendras", medida:"1 taza", cantidad:"250ml"}
+        ]},
+        { id:"f", tipo:"fruta", porciones:2, opciones:[
+          {descripcion:"Mango", medida:"½ taza", cantidad:"100g"},
+          {descripcion:"Melón", medida:"1¼ taza", cantidad:"170g"},
+          {descripcion:"Plátano pequeño", medida:"1 unidad", cantidad:"80g"},
+          {descripcion:"Fresas", medida:"1¼ taza", cantidad:"170g"},
+          {descripcion:"Arándanos", medida:"¾ taza", cantidad:"90g"},
+          {descripcion:"Papaya", medida:"1 taza", cantidad:"120g"},
+          {descripcion:"Piña", medida:"¾ taza", cantidad:"120g"}
+        ]}
+      ], alts:[
+        {t:"Alternativa: 1 Gloria Pro Power (210 kcal) reemplaza toda la media tarde."}
+      ] },
+
+    { id:"cena", nombre:"Cena", horario:"08:00 pm", emoji:"🌙", kcal:370, grupos:[
+        { id:"c", tipo:"carbohidrato", porciones:2, nota:"Puedes repetir porciones", opciones:[
+          {descripcion:"Pan de molde", medida:"1 tajada", cantidad:"25g"},
+          {descripcion:"Pan (centeno, francés, yema…)", medida:"½ unidad", cantidad:"25g"},
+          {descripcion:"Rapidita", medida:"1 unidad"},
+          {descripcion:"Avena cruda", medida:"3 cdas", cantidad:"20g"},
+          {descripcion:"Avena, quinua o maca bebible", medida:"½ taza"},
+          {descripcion:"Granola", medida:"¼ taza", cantidad:"20g"},
+          {descripcion:"Cereales sin azúcar", medida:"½ taza", cantidad:"20g"}
+        ]},
+        { id:"p", tipo:"proteina_grasa", porciones:2, opciones:[
+          {descripcion:"Huevo", medida:"1 unidad"},
+          {descripcion:"Atún", cantidad:"45g"},
+          {descripcion:"Pollo deshilachado", medida:"3 cdas llenas", cantidad:"45g"},
+          {descripcion:"Queso", cantidad:"30g"},
+          {descripcion:"Jamón", medida:"2 tajadas"},
+          {descripcion:"Hot dog", medida:"½ unidad"},
+          {descripcion:"Leche descremada", medida:"1 taza", cantidad:"250ml"},
+          {descripcion:"Yogurt bebible light", medida:"1 vaso", cantidad:"200ml"},
+          {descripcion:"Leche de almendras", medida:"1 taza", cantidad:"250ml"}
+        ]},
+        { id:"f", tipo:"fruta", porciones:1, opciones:[
+          {descripcion:"Mango", medida:"½ taza", cantidad:"100g"},
+          {descripcion:"Melón", medida:"1¼ taza", cantidad:"170g"},
+          {descripcion:"Plátano pequeño", medida:"1 unidad", cantidad:"80g"},
+          {descripcion:"Fresas", medida:"1¼ taza", cantidad:"170g"},
+          {descripcion:"Arándanos", medida:"¾ taza", cantidad:"90g"},
+          {descripcion:"Papaya", medida:"1 taza", cantidad:"120g"},
+          {descripcion:"Piña", medida:"¾ taza", cantidad:"120g"}
+        ]}
+      ], alts:[
+        {t:"Omitiendo la media tarde + 1 carbo del almuerzo, puedes comer 1 Street Food Pequeña."},
+        {t:"Puedes tomar 1 mojito, o 3 mojitos si omites la media tarde."}
+      ] }
+  ],
+
+  entrenamiento: {
+    extraKcal: 180,
+    opciones: [
+      "1 scoop de proteína en polvo + 1 porción de fruta o 100 ml de leche light Slim Gloria",
+      "Mini sandwich: 1 rodaja de pan + 1 jamón de pollo o 30g de atún + 2 cdas de palta al ras",
+      "Panqueques: 3 cdas de avena + 1 huevo + 1 cdta de aceite para prepararlo",
+      "1 Gatorade + 1 porción de fruta",
+      "2 porciones de fruta + 1 cdta de mantequilla de maní"
+    ]
+  },
+
+  gustos: [
+    {cls:"g-mini", em:"🍬", nm:"Mini Sabrosura", kc:100, items:["5 Ole Ole","1 Cucua personal (18g)","2 Frunas (16g)","1 Snicker pequeño (21.5g)","1 Hershey pequeño (20g)","1 Milky La Ibérica pequeño (20g)","1 Doña Pepa (23g)"]},
+    {cls:"g-reg", em:"🍫", nm:"Sabrosura", kc:210, items:["1 chocolate individual","1 paquete personal de galleta","1 helado individual","1 bolsa de Inka Chips o Lays (30g)","1 porción de keke (60g)","1 onigiri de Oxxo","40g de turrón"]},
+    {cls:"g-pos", em:"🎂", nm:"Postre", kc:400, items:["Torta de chocolate (120g)","Cheesecake pequeño (palma de la mano)","Keke Starbucks","Pie de limón o manzana","Picarones con miel x2"]}
+  ],
+
+  street_food: [
+    {id:"peq", nm:"Pequeña", kc:650, items:["Yopo: 4 chicken tenders + 1 salsa","Yopo: 12 chicken nuggets","Burger King: Whopper Grande","Burger King: Whopper Junior + papas medianas","Bembos: Cheese burger mediana + 2 nuggets","Bembos: Hamburguesa clásica mediana","Mc Donalds: Big Mac","Mc Donalds: Cuarto de Libra","Mc Donalds: Doble hamburguesa con queso + 6 Mc Nuggets","KFC: 8 hot wings","KFC: Twister mediano","KFC: 1 pieza crispy parte pecho","Papas fritas medianas + 2 sachets de salsa","Yopo: Tex Mex Salad (sin nachos ni aliño)","Bembos: Cheese burger regular + papas pequeñas","3 slices de pizza","¼ pollo a la brasa (sin piel) + ¼ plato papas (100g)","2 slices de pizza con borde de queso","China Wok: arroz chaufa de pollo personal","Papa John's: 7 mini cheesesticks","La Lucha: Pan con lechón","La Lucha: Sánguche de pavo a la leña","Chillis: Margarita grill chicken","Tabla de 10 makis sin salsa extra"]},
+    {id:"med", nm:"Mediana", kc:850, items:["La Lucha: Sánguche de chicharrón","La Lucha: Sánguche de pollo deluxe","La Lucha: Pan con lechón + papas Jr","La Lucha: Sánguche pavo a la leña + papas Jr","Duo Marino: Ceviche + chicharrón de pescado / arroz con mariscos","Parrilla: 250g res o pollo + ½ tz papas doradas + ensalada","¼ pollo a la brasa + ½ porción papas + 1-2 cdas cremas","Yopo: Tex Mex bowl","Yopo: 6 Chicken Nuggets + papas fritas","Mc Donalds: Doble queso + 10 nuggets","Mc Donalds: Doble queso + Mc Flurry","Bembos: Cheese mediana + papas medianas","Bembos: Cheese mediana + 6 nuggets","Bembos: A lo pobre mediana","KFC: Sandwich de pechuga + 8 nuggets","Popeyes: Tradi Roll","Fridays: Alitas BBQ","Fridays: Cheese Burger","Fridays: Signature Burger","Oakberry mediano con toppings (maní, plátano, fresa, arándanos)","China Wok: Pollo Chi Jau Kay / Ti Pa Kay","China Wok: 6 wantán frito","China Wok: Tallarín Taypá","1 shawarma","4 slices de pizza","8 makis con salsa"]},
+    {id:"gra", nm:"Grande", kc:1200, items:["Yopo: Wrapper Chingón","Yopo: Wrapper original","Yopo: Wrapper trufado","Yopo: BBQ wrapper + 6 nuggets","Yopo: BBQ bowl","Bembos: A lo pobre mediana + papas medianas","Bembos: Parrillera mediana + papas medianas","5 slices de pizza","4 slices de pizza con borde de queso"]}
+  ],
+
+  recomendaciones: [
+    {e:"📅", t:"Sigue el plan de lunes a domingo para alcanzar tus objetivos."},
+    {e:"✅", t:"Cualquier bebida sin azúcar está permitida."},
+    {e:"💧", t:"Consume mínimo 2L de líquido al día."},
+    {e:"🍯", t:"Usa Stevia con yacón (en pote) y aceite en aerosol."},
+    {e:"🍳", t:"Prefiere preparaciones a la plancha, al horno, al vapor o salteados."},
+    {e:"🚫", t:"Evita las frituras."}
+  ]
+};
+
+/* ════════════════════════════════════════════════════════════════════════
+   MOTOR DE RENDER · No se modifica al generar un plan nuevo.
+   ════════════════════════════════════════════════════════════════════════ */
+const KCAL = PLAN.equivalencias;
+const MEALS = PLAN.comidas;
 const TIPO_LABEL = { carbohidrato:"Carbohidratos", proteina_grasa:"Proteínas (con grasa)",
   proteina_magra:"Proteínas magras", fruta:"Frutas", ensalada:"Ensalada", lacteo:"Lácteo / bebida" };
+const TIPO_COLOR = { carbohidrato:'#F59E0B', proteina_grasa:'#F43F5E', proteina_magra:'#8B5CF6', fruta:'#22C55E', ensalada:'#10B981', lacteo:'#3B82F6' };
 
-const FRUTAS = [
-  {descripcion:"Mango", medida:"½ taza", cantidad:"100g"},
-  {descripcion:"Melón", medida:"1¼ taza", cantidad:"170g"},
-  {descripcion:"Plátano pequeño", medida:"1 unidad", cantidad:"80g"},
-  {descripcion:"Fresas", medida:"1¼ taza", cantidad:"170g"},
-  {descripcion:"Arándanos", medida:"¾ taza", cantidad:"90g"},
-  {descripcion:"Papaya", medida:"1 taza", cantidad:"120g"},
-  {descripcion:"Piña", medida:"¾ taza", cantidad:"120g"}
-];
-const PAN_CARBO = [
-  {descripcion:"Pan de molde", medida:"1 tajada", cantidad:"25g"},
-  {descripcion:"Pan (centeno, francés, yema…)", medida:"½ unidad", cantidad:"25g"},
-  {descripcion:"Rapidita", medida:"1 unidad"},
-  {descripcion:"Avena cruda", medida:"3 cdas", cantidad:"20g"},
-  {descripcion:"Avena, quinua o maca bebible", medida:"½ taza"},
-  {descripcion:"Granola", medida:"¼ taza", cantidad:"20g"},
-  {descripcion:"Cereales sin azúcar", medida:"½ taza", cantidad:"20g"}
-];
-const PROT_GRASA = [
-  {descripcion:"Huevo", medida:"1 unidad"},
-  {descripcion:"Atún", cantidad:"45g"},
-  {descripcion:"Pollo deshilachado", medida:"3 cdas llenas", cantidad:"45g"},
-  {descripcion:"Queso", cantidad:"30g"},
-  {descripcion:"Jamón", medida:"2 tajadas"},
-  {descripcion:"Hot dog", medida:"½ unidad"},
-  {descripcion:"Leche descremada", medida:"1 taza", cantidad:"250ml"},
-  {descripcion:"Yogurt bebible light", medida:"1 vaso", cantidad:"200ml"},
-  {descripcion:"Leche de almendras", medida:"1 taza", cantidad:"250ml"}
-];
-const LACTEO = [
-  {descripcion:"Leche descremada", medida:"1 taza", cantidad:"250ml"},
-  {descripcion:"Yogurt bebible light", medida:"1 vaso", cantidad:"200ml"},
-  {descripcion:"Leche de almendras", medida:"1 taza", cantidad:"250ml"}
-];
+const DAILY_TARGET = PLAN.resumen.kcal;
+const EXTRA_KCAL = PLAN.entrenamiento.extraKcal;
+// Clave de localStorage derivada del nombre del paciente: cada plan se guarda por separado.
+function slug(s){ return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+const LS_KEY = 'plan_' + slug(PLAN.paciente.nombre) + '_v1';
 
-const MEALS = [
-  { id:"desayuno", nombre:"Desayuno", horario:"11:00 am", emoji:"☀️", kcal:295, grupos:[
-      {id:"c", tipo:"carbohidrato", porciones:2, nota:"Puedes repetir porciones", opciones:PAN_CARBO},
-      {id:"p", tipo:"proteina_grasa", porciones:1, opciones:PROT_GRASA},
-      {id:"f", tipo:"fruta", porciones:1, opciones:FRUTAS}
-    ], alts:[] },
-  { id:"almuerzo", nombre:"Almuerzo", horario:"04:00 pm", emoji:"🍽️", kcal:540, grupos:[
-      {id:"c", tipo:"carbohidrato", porciones:3, nota:"Puedes repetir porciones", opciones:[
-        {descripcion:"Arroz blanco", medida:"⅓ taza", cantidad:"60g"},
-        {descripcion:"Papa o camote", medida:"½ unidad", cantidad:"90g"},
-        {descripcion:"Yuca", medida:"⅓ taza", cantidad:"50g"},
-        {descripcion:"Choclo en grano", medida:"½ taza", cantidad:"110g"},
-        {descripcion:"Menestras", medida:"⅓ taza", cantidad:"70g"},
-        {descripcion:"Guiso criollo", medida:"½ taza", cantidad:"100g"},
-        {descripcion:"Pasta", medida:"½ taza", cantidad:"45g"}
-      ]},
-      {id:"p", tipo:"proteina_magra", porciones:5, nota:"Magras, sin grasa visible", opciones:[
-        {descripcion:"Carne de res", cantidad:"25g"},
-        {descripcion:"Pollo o pavo", cantidad:"35g"},
-        {descripcion:"Pescado o atún escurrido", cantidad:"35g"},
-        {descripcion:"Lomo de cerdo / chuleta (sin borde graso)", cantidad:"35g"},
-        {descripcion:"Pollo Avinka", medida:"1 dedo"},
-        {descripcion:"Nugget de pollo Avinka", medida:"1 unidad"}
-      ]},
-      {id:"e", tipo:"ensalada", porciones:1, nota:"1 taza libre: lechuga, tomate, pepino, cebolla, zanahoria, brócoli, espárrago, col morada, arúgula, pimiento, rabanito, espinaca…", opciones:[
-        {descripcion:"Ensalada a tu gusto", medida:"1 taza"}
-      ]}
-    ], alts:[
-      {t:"Si comes menú (sin frituras), omite la porción de yogurt de la media tarde."}
-    ] },
-  { id:"media", nombre:"Media Tarde", horario:"06:00 pm", emoji:"🥤", kcal:195, grupos:[
-      {id:"l", tipo:"lacteo", porciones:1, opciones:LACTEO},
-      {id:"f", tipo:"fruta", porciones:2, opciones:FRUTAS}
-    ], alts:[
-      {t:"Alternativa: 1 Gloria Pro Power (210 kcal) reemplaza toda la media tarde."}
-    ] },
-  { id:"cena", nombre:"Cena", horario:"08:00 pm", emoji:"🌙", kcal:370, grupos:[
-      {id:"c", tipo:"carbohidrato", porciones:2, nota:"Puedes repetir porciones", opciones:PAN_CARBO},
-      {id:"p", tipo:"proteina_grasa", porciones:2, opciones:PROT_GRASA},
-      {id:"f", tipo:"fruta", porciones:1, opciones:FRUTAS}
-    ], alts:[
-      {t:"Omitiendo la media tarde + 1 carbo del almuerzo, puedes comer 1 Street Food Pequeña."},
-      {t:"Puedes tomar 1 mojito, o 3 mojitos si omites la media tarde."}
-    ] }
-];
-
-const TRAIN = [
-  "1 scoop de proteína en polvo + 1 porción de fruta o 100 ml de leche light Slim Gloria",
-  "Mini sandwich: 1 rodaja de pan + 1 jamón de pollo o 30g de atún + 2 cdas de palta al ras",
-  "Panqueques: 3 cdas de avena + 1 huevo + 1 cdta de aceite para prepararlo",
-  "1 Gatorade + 1 porción de fruta",
-  "2 porciones de fruta + 1 cdta de mantequilla de maní"
-];
-
-const GUSTOS = [
-  {cls:"g-mini", em:"🍬", nm:"Mini Sabrosura", kc:100, items:["5 Ole Ole","1 Cucua personal (18g)","2 Frunas (16g)","1 Snicker pequeño (21.5g)","1 Hershey pequeño (20g)","1 Milky La Ibérica pequeño (20g)","1 Doña Pepa (23g)"]},
-  {cls:"g-reg", em:"🍫", nm:"Sabrosura", kc:210, items:["1 chocolate individual","1 paquete personal de galleta","1 helado individual","1 bolsa de Inka Chips o Lays (30g)","1 porción de keke (60g)","1 onigiri de Oxxo","40g de turrón"]},
-  {cls:"g-pos", em:"🎂", nm:"Postre", kc:400, items:["Torta de chocolate (120g)","Cheesecake pequeño (palma de la mano)","Keke Starbucks","Pie de limón o manzana","Picarones con miel x2"]}
-];
-
-const SF = [
-  {id:"peq", nm:"Pequeña", kc:650, items:["Yopo: 4 chicken tenders + 1 salsa","Yopo: 12 chicken nuggets","Burger King: Whopper Grande","Burger King: Whopper Junior + papas medianas","Bembos: Cheese burger mediana + 2 nuggets","Bembos: Hamburguesa clásica mediana","Mc Donalds: Big Mac","Mc Donalds: Cuarto de Libra","Mc Donalds: Doble hamburguesa con queso + 6 Mc Nuggets","KFC: 8 hot wings","KFC: Twister mediano","KFC: 1 pieza crispy parte pecho","Papas fritas medianas + 2 sachets de salsa","Yopo: Tex Mex Salad (sin nachos ni aliño)","Bembos: Cheese burger regular + papas pequeñas","3 slices de pizza","¼ pollo a la brasa (sin piel) + ¼ plato papas (100g)","2 slices de pizza con borde de queso","China Wok: arroz chaufa de pollo personal","Papa John's: 7 mini cheesesticks","La Lucha: Pan con lechón","La Lucha: Sánguche de pavo a la leña","Chillis: Margarita grill chicken","Tabla de 10 makis sin salsa extra"]},
-  {id:"med", nm:"Mediana", kc:850, items:["La Lucha: Sánguche de chicharrón","La Lucha: Sánguche de pollo deluxe","La Lucha: Pan con lechón + papas Jr","La Lucha: Sánguche pavo a la leña + papas Jr","Duo Marino: Ceviche + chicharrón de pescado / arroz con mariscos","Parrilla: 250g res o pollo + ½ tz papas doradas + ensalada","¼ pollo a la brasa + ½ porción papas + 1-2 cdas cremas","Yopo: Tex Mex bowl","Yopo: 6 Chicken Nuggets + papas fritas","Mc Donalds: Doble queso + 10 nuggets","Mc Donalds: Doble queso + Mc Flurry","Bembos: Cheese mediana + papas medianas","Bembos: Cheese mediana + 6 nuggets","Bembos: A lo pobre mediana","KFC: Sandwich de pechuga + 8 nuggets","Popeyes: Tradi Roll","Fridays: Alitas BBQ","Fridays: Cheese Burger","Fridays: Signature Burger","Oakberry mediano con toppings (maní, plátano, fresa, arándanos)","China Wok: Pollo Chi Jau Kay / Ti Pa Kay","China Wok: 6 wantán frito","China Wok: Tallarín Taypá","1 shawarma","4 slices de pizza","8 makis con salsa"]},
-  {id:"gra", nm:"Grande", kc:1200, items:["Yopo: Wrapper Chingón","Yopo: Wrapper original","Yopo: Wrapper trufado","Yopo: BBQ wrapper + 6 nuggets","Yopo: BBQ bowl","Bembos: A lo pobre mediana + papas medianas","Bembos: Parrillera mediana + papas medianas","5 slices de pizza","4 slices de pizza con borde de queso"]}
-];
-
-const RECS = [
-  {e:"📅", t:"Sigue el plan de lunes a domingo para alcanzar tus objetivos."},
-  {e:"✅", t:"Cualquier bebida sin azúcar está permitida."},
-  {e:"💧", t:"Consume mínimo 2L de líquido al día."},
-  {e:"🍯", t:"Usa Stevia con yacón (en pote) y aceite en aerosol."},
-  {e:"🍳", t:"Prefiere preparaciones a la plancha, al horno, al vapor o salteados."},
-  {e:"🚫", t:"Evita las frituras."}
-];
-
-// ── helpers ──
 const state = {}; // state[mealId][grpId][optIdx] = count
-const DAILY_TARGET = 1391;
-const LS_KEY = 'plan_danitza_ruiz_v1';
+const extras = {}; // extras[key] = { kcal, label, emoji } · street food / antojos sumados al día
 let trained = false;
 
+// ── encabezado del paciente ──
+document.getElementById('pac-nombre').innerHTML = PLAN.paciente.nombre;
+document.getElementById('pac-sub').innerHTML = PLAN.paciente.sub;
+document.getElementById('pac-objetivo').textContent = PLAN.paciente.objetivo;
+document.title = 'Plan de Alimentación · ' + PLAN.paciente.nombre;
+document.getElementById('vitals').innerHTML = PLAN.paciente.vitales.map(v=>
+  `<div class="vital"><div class="v">${v.v}${v.u?`<span style="font-size:11px">${v.u}</span>`:''}</div><div class="l">${v.l}</div></div>`).join('');
+
+// ── macros ──
+document.getElementById('rs-kcal').textContent = PLAN.resumen.kcal;
+document.getElementById('rs-prot').textContent = PLAN.resumen.prot + 'g';
+document.getElementById('rs-carbo').textContent = PLAN.resumen.carbo + 'g';
+document.getElementById('rs-grasa').textContent = PLAN.resumen.grasa + 'g';
+document.getElementById('ring-p').style.width = PLAN.resumen.pctProt + '%';
+document.getElementById('ring-c').style.width = PLAN.resumen.pctCarbo + '%';
+document.getElementById('ring-g').style.width = PLAN.resumen.pctGrasa + '%';
+document.getElementById('ring-leg').innerHTML =
+  `<span><b style="background:var(--protm)"></b>Proteína ${PLAN.resumen.pctProt}%</span>
+   <span><b style="background:var(--carbo)"></b>Carbos ${PLAN.resumen.pctCarbo}%</span>
+   <span><b style="background:var(--protg)"></b>Grasas ${PLAN.resumen.pctGrasa}%</span>`;
+document.getElementById('day-tgt').textContent = DAILY_TARGET;
+
+// ── helpers ──
 function multiply(op, n) {
   const parts = [];
   if (op.medida) parts.push(n > 1 ? `${op.medida} ×${n}` : op.medida);
@@ -497,16 +610,48 @@ function multiply(op, n) {
   return parts.join(' · ');
 }
 function base(op){ return [op.medida, op.cantidad].filter(Boolean).join(' · '); }
+// Escapa un texto para usarlo como argumento string dentro de un onclick="..." inline.
+function jsStr(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 
 function computeMealKcal(meal){ let k=0; meal.grupos.forEach(g=>Object.entries(state[meal.id][g.id]).forEach(([i,n])=>{ if(n>0) k+=n*KCAL[g.tipo]; })); return k; }
-function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({state, trained})); }catch(e){} }
+function computeExtrasKcal(){ return Object.values(extras).reduce((s,e)=>s + e.kcal*(e.count||1), 0); }
+function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({state, trained, extras})); }catch(e){} }
 function loadState(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) return; const s=JSON.parse(raw);
   if(s.state) MEALS.forEach(m=>{ if(s.state[m.id]) m.grupos.forEach(g=>{ if(s.state[m.id][g.id]) state[m.id][g.id]=s.state[m.id][g.id]; }); });
+  if(s.extras){ Object.assign(extras, s.extras); Object.values(extras).forEach(e=>{ if(typeof e.count!=='number'||e.count<1) e.count=1; }); }
   trained = !!s.trained; }catch(e){} }
 function toggleTrained(v){ trained=v; refreshDaily(); saveState(); }
+
+// ── extras consumidos (street food / antojos) ──
+// Registro libre que suma kcal a las calorías consumidas del día sin tocar el
+// medidor de porciones de cada comida. Cada opción tiene su botón ＋ y cada nivel
+// un botón "general" (por si no quiere especificar cuál). Se puede registrar la
+// misma opción varias veces (cantidad) y quitar una a una desde su chip en la
+// barra diaria. Todo se guarda en localStorage.
+function addExtra(key, kcal, label, emoji){
+  if(extras[key]) extras[key].count++;
+  else extras[key] = { count:1, kcal, label, emoji };
+  refreshExtraUI(); refreshDaily(); saveState();
+}
+function removeExtra(key){
+  if(!extras[key]) return;
+  if(--extras[key].count <= 0) delete extras[key];
+  refreshExtraUI(); refreshDaily(); saveState();
+}
+function refreshExtraUI(){
+  const wrap = document.getElementById('day-extras');
+  const keys = Object.keys(extras);
+  wrap.classList.toggle('show', keys.length>0);
+  wrap.innerHTML = keys.map(k=>{
+    const e = extras[k]; const n = e.count||1;
+    const qty = n>1 ? ` ×${n}` : '';
+    return `<span class="day-chip">${e.emoji} <span class="dc-l">${e.label}</span>${qty} <b>+${e.kcal*n}</b><button onclick="removeExtra('${k}')" aria-label="Quitar uno">✕</button></span>`;
+  }).join('');
+}
+
 function refreshDaily(){
-  const target = DAILY_TARGET + (trained ? 180 : 0);
-  const total = MEALS.reduce((s,m)=>s+computeMealKcal(m),0);
+  const target = DAILY_TARGET + (trained ? EXTRA_KCAL : 0);
+  const total = MEALS.reduce((s,m)=>s+computeMealKcal(m),0) + computeExtrasKcal();
   const pct = Math.min(100, Math.round(total/target*100));
   const fill = document.getElementById('day-fill');
   document.getElementById('day-now').textContent = total;
@@ -515,7 +660,7 @@ function refreshDaily(){
   fill.style.background = total===0 ? '#475569'
     : (total>target ? 'linear-gradient(90deg,#F43F5E,#FB7185)' : 'linear-gradient(90deg,#22C55E,#4ADE80)');
   const diff = target-total; const rem=document.getElementById('day-rem');
-  if(total===0){ rem.textContent = trained ? '+180 kcal de entreno' : ''; rem.style.color='#C4B5FD'; }
+  if(total===0){ rem.textContent = trained ? `+${EXTRA_KCAL} kcal de entreno` : ''; rem.style.color='#C4B5FD'; }
   else if(diff>=0){ rem.textContent=`Faltan ${diff} kcal`; rem.style.color='#86EFAC'; }
   else { rem.textContent=`+${-diff} kcal extra`; rem.style.color='#FCA5A5'; }
 }
@@ -526,7 +671,6 @@ MEALS.forEach(meal => {
   state[meal.id] = {};
   const gruposHtml = meal.grupos.map(g => {
     state[meal.id][g.id] = {};
-    const label = `Elige ${g.porciones}`;
     const dots = Array.from({length:g.porciones}, (_,i)=>`<i data-dot="${meal.id}-${g.id}-${i}"></i>`).join('');
     const opts = g.opciones.map((op,i)=>`
       <div class="opt" id="opt-${meal.id}-${g.id}-${i}">
@@ -555,7 +699,7 @@ MEALS.forEach(meal => {
       </div>`;
   }).join('');
 
-  const altsHtml = meal.alts.length ? `<div class="alts">${meal.alts.map(a=>
+  const altsHtml = meal.alts && meal.alts.length ? `<div class="alts">${meal.alts.map(a=>
     `<div class="alt"><span class="i">💡</span><span>${a.t}</span></div>`).join('')}</div>` : '';
 
   mealsEl.insertAdjacentHTML('beforeend', `
@@ -580,8 +724,6 @@ MEALS.forEach(meal => {
       </div>
     </div>`);
 });
-
-const TIPO_COLOR = { carbohidrato:'#F59E0B', proteina_grasa:'#F43F5E', proteina_magra:'#8B5CF6', fruta:'#22C55E', ensalada:'#10B981', lacteo:'#3B82F6' };
 
 function step(mealId, grpId, idx, delta) {
   const meal = MEALS.find(m=>m.id===mealId);
@@ -613,7 +755,6 @@ function refreshGrp(mealId, grp) {
     d.classList.toggle('on', i < Math.min(total, grp.porciones));
     d.classList.remove('over');
   });
-  // extra dots if over budget
   const extra = total - grp.porciones;
   if (extra > 0) {
     [...dotsWrap.children].forEach(d=>d.classList.add('on'));
@@ -650,10 +791,10 @@ function toggleGrp(uid){
   document.getElementById('chev-'+uid).classList.toggle('open');
 }
 
-// open first group of each meal by default
+// abre el primer grupo de cada comida por defecto
 MEALS.forEach(m=>{ const g=m.grupos[0]; toggleGrp(`${m.id}-${g.id}`); });
 
-// ── restore saved selection ──
+// ── restaurar selección guardada ──
 loadState();
 const tc = document.getElementById('train-check'); if(tc) tc.checked = trained;
 MEALS.forEach(meal=>{
@@ -662,31 +803,40 @@ MEALS.forEach(meal=>{
 });
 refreshDaily();
 
-// ── training ──
-document.getElementById('train').innerHTML = TRAIN.map((t,i)=>
+// ── entrenamiento ──
+document.getElementById('train-badge').textContent = `+${EXTRA_KCAL} kcal`;
+document.getElementById('train-toggle-lbl').textContent =
+  `¿Entrenaste hoy? Sube tu requerimiento a ${DAILY_TARGET + EXTRA_KCAL} kcal (+${EXTRA_KCAL})`;
+document.getElementById('train').innerHTML = PLAN.entrenamiento.opciones.map((t,i)=>
   `<div class="train-opt"><span class="n">${i+1}</span><span>${t}</span></div>`).join('');
 
 // ── gustos ──
-document.getElementById('p-gustos').innerHTML = GUSTOS.map((g,i)=>`
+document.getElementById('p-gustos').innerHTML = PLAN.gustos.map((g,i)=>`
   <div class="gusto ${g.cls}">
     <div class="gusto-h" onclick="toggleGusto(${i})">
       <div class="l"><span class="em">${g.em}</span><span class="nm">${g.nm}</span></div>
       <span class="kc">${g.kc} kcal</span>
     </div>
     <div class="gusto-b" id="gusto-${i}">
-      ${g.items.map(it=>`<div class="gusto-it"><span class="d">▸</span><span>${it}</span></div>`).join('')}
+      ${g.items.map((it,j)=>`<div class="gusto-it"><span class="d">▸</span><span class="it-name">${it}</span><button class="it-add" onclick="addExtra('gusto-${i}-${j}', ${g.kc}, '${jsStr(it)}', '${g.em}')" aria-label="Registrar">＋</button></div>`).join('')}
+      <div class="gusto-add">
+        <button class="gusto-add-btn" onclick="addExtra('gusto-${i}-gen', ${g.kc}, '${jsStr(g.nm)}', '${g.em}')">＋ Registrar ${g.nm} sin especificar · +${g.kc} kcal</button>
+      </div>
     </div>
   </div>`).join('');
 function toggleGusto(i){ document.getElementById('gusto-'+i).classList.toggle('open'); }
 
 // ── street food ──
-document.getElementById('sf-tabs').innerHTML = SF.map((s,i)=>
+document.getElementById('sf-tabs').innerHTML = PLAN.street_food.map((s,i)=>
   `<div class="sf-tab ${s.id} ${i===0?'active':''}" onclick="switchSf('${s.id}')"><div class="nm">${s.nm}</div><div class="kc">≤ ${s.kc} kcal</div></div>`).join('');
-document.getElementById('sf-pans').innerHTML = SF.map((s,i)=>`
+document.getElementById('sf-pans').innerHTML = PLAN.street_food.map((s,i)=>`
   <div class="sf-pan ${s.id} ${i===0?'active':''}" id="sfp-${s.id}">
     <div class="sf-card">
-      <div class="sf-ban">🍔 Elige 1 opción · hasta ${s.kc} kcal</div>
-      <div class="sf-list">${s.items.map(it=>`<div class="sf-it"><span class="e">🍽️</span><span>${it}</span></div>`).join('')}</div>
+      <div class="sf-ban">🍔 Registra lo que comiste · ${s.nm} (hasta ${s.kc} kcal c/u)</div>
+      <div class="sf-list">${s.items.map((it,j)=>`<div class="sf-it"><span class="e">🍽️</span><span class="it-name">${it}</span><button class="it-add" onclick="addExtra('sf-${s.id}-${j}', ${s.kc}, '${jsStr(it)}', '🍔')" aria-label="Registrar">＋</button></div>`).join('')}</div>
+      <div class="sf-add">
+        <button class="sf-add-btn" onclick="addExtra('sf-${s.id}-gen', ${s.kc}, 'Street Food ${s.nm}', '🍔')">＋ Registrar ${s.nm} sin especificar · +${s.kc} kcal</button>
+      </div>
     </div>
   </div>`).join('');
 function switchSf(id){
@@ -696,11 +846,15 @@ function switchSf(id){
   document.getElementById('sfp-'+id).classList.add('active');
 }
 
-// ── recom ──
-document.getElementById('recs').innerHTML = RECS.map(r=>
+// refleja el estado guardado de los extras (botones + chips) ya que el street food
+// se renderiza después de cargar el estado
+refreshExtraUI();
+
+// ── recomendaciones ──
+document.getElementById('recs').innerHTML = PLAN.recomendaciones.map(r=>
   `<div class="rec"><span class="e">${r.e}</span><span>${r.t}</span></div>`).join('');
 
-// ── main tabs ──
+// ── tabs principales ──
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
