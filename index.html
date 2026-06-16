@@ -325,7 +325,7 @@
     <div class="train-h"><span class="e">🏋️</span><h3>Elige 1 de estas opciones</h3><span class="b">+180 kcal</span></div>
     <div class="train-list" id="train"></div>
     <label class="train-toggle">
-      <span class="lbl">¿Entrenaste hoy? Suma +180 kcal al total del día</span>
+      <span class="lbl">¿Entrenaste hoy? Sube tu requerimiento a 1571 kcal (+180)</span>
       <input type="checkbox" id="train-check" onchange="toggleTrained(this.checked)">
       <span class="switch"></span>
     </label>
@@ -357,7 +357,7 @@
     <div class="day-top">
       <div>
         <div class="l">🔥 Total del día</div>
-        <div class="v"><span id="day-now">0</span> <span class="tgt">/ 1391 kcal</span></div>
+        <div class="v"><span id="day-now">0</span> <span class="tgt">/ <span id="day-tgt">1391</span> kcal</span></div>
       </div>
       <div class="rem" id="day-rem"></div>
     </div>
@@ -505,15 +505,17 @@ function loadState(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) retu
   trained = !!s.trained; }catch(e){} }
 function toggleTrained(v){ trained=v; refreshDaily(); saveState(); }
 function refreshDaily(){
-  let total = MEALS.reduce((s,m)=>s+computeMealKcal(m),0); if(trained) total+=180;
-  const pct = Math.min(100, Math.round(total/DAILY_TARGET*100));
+  const target = DAILY_TARGET + (trained ? 180 : 0);
+  const total = MEALS.reduce((s,m)=>s+computeMealKcal(m),0);
+  const pct = Math.min(100, Math.round(total/target*100));
   const fill = document.getElementById('day-fill');
   document.getElementById('day-now').textContent = total;
+  document.getElementById('day-tgt').textContent = target;
   fill.style.width = pct+'%';
   fill.style.background = total===0 ? '#475569'
-    : (total>DAILY_TARGET ? 'linear-gradient(90deg,#F43F5E,#FB7185)' : 'linear-gradient(90deg,#22C55E,#4ADE80)');
-  const diff = DAILY_TARGET-total; const rem=document.getElementById('day-rem');
-  if(total===0){ rem.textContent=''; }
+    : (total>target ? 'linear-gradient(90deg,#F43F5E,#FB7185)' : 'linear-gradient(90deg,#22C55E,#4ADE80)');
+  const diff = target-total; const rem=document.getElementById('day-rem');
+  if(total===0){ rem.textContent = trained ? '+180 kcal de entreno' : ''; rem.style.color='#C4B5FD'; }
   else if(diff>=0){ rem.textContent=`Faltan ${diff} kcal`; rem.style.color='#86EFAC'; }
   else { rem.textContent=`+${-diff} kcal extra`; rem.style.color='#FCA5A5'; }
 }
